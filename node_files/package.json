@@ -1,0 +1,27 @@
+{
+  "name": "node_files",
+  "version": "1.0.0",
+  "description": "This package holds the files for the real-time cheat card game",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon app.js"
+  },
+  "keywords": [
+    "cheat",
+    "cards"
+  ],
+  "author": "Alex Keaveney",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "commander": "^2.12.2",
+    "content-disposition": "^0.5.2",
+    "express": "^4.16.2",
+    "mongodb": "^3.0.0-rc0",
+    "socket.io": "^2.0.4",
+    "socketio": "^1.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.12.6"
+  }
+}

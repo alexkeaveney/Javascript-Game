@@ -1,0 +1,96 @@
+<html>
+    <head>
+        <title>Howiya</title>
+        <script src="../socket.io/socket.io.js"></script>
+    </head>
+    <body>
+        <h1>Welcome guest</h1>
+
+<!-- Sign In / Up ---------------------------------------------------------->
+
+        <h2>Sign In / Up</h2>
+        <form action="/" method="post">
+            <table>
+                <tr>
+                    <td>Username</td>
+                    <td>
+                        <input id="username" type="text" name="user[name]">
+                    </td>
+                </tr>
+                <tr>
+                    <td id="takenError" colspan="2"></td>
+                </tr>
+                <tr>
+                    <td>Password</td>
+                    <td>
+                        <input id="password" type="password" name="user[password]">
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="submit" id="login" value="Submit">
+                    </td>
+                </tr>
+            </table>
+        </form>
+
+
+<!-- End of Sign In / Up ---------------------------------------------------------->
+
+
+
+
+
+        <p>
+<!--            <a href="/lobby">-->
+                <button id='startButton'>Start game</button>
+<!--            </a>-->
+        </p>
+        <p>
+            <a href="/howto">
+                <button id='howToButton'>How to play</button>
+            </a>
+        </p>
+        <script>
+          //get the current users in the room so they can't have the same name
+
+          const socket = io.connect();
+
+          let userlist;
+
+          socket.on('userList', function(users) {
+            userList = users;
+          });
+
+          socket.on('addPlayer', function(user) {
+            userList.push(user);
+          });
+
+          //send the message to the server to give username / get added to userlist
+          document.getElementById('startButton').addEventListener('click', function() {
+            let flag = true;
+            let user = document.getElementById('username').value;
+            let error = document.getElementById('takenError').innerHTML;
+
+            if (user === undefined) {
+               error = "You must enter a name";
+               flag = false;
+            }
+            else {
+              userList.forEach(function(element) {
+                if (element === user) {
+                  error = "Username already taken";
+                  flag = false;
+                }
+              });
+            }
+
+            if (flag){ socket.emit('connectPlayer', user); }
+
+
+          });
+        </script>
+
+
+    </body>
+</html>

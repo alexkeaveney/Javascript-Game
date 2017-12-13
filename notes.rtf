@@ -1,0 +1,132 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1561
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fmodern\fcharset0 Courier;\f2\fnil\fcharset0 Menlo-Regular;
+\f3\fswiss\fcharset0 ArialMT;}
+{\colortbl;\red255\green255\blue255;\red19\green19\blue19;\red249\green249\blue249;\red12\green99\blue153;
+\red93\green108\blue125;\red234\green234\blue234;\red34\green34\blue34;\red193\green193\blue193;\red135\green135\blue135;
+\red109\green188\blue135;\red19\green19\blue19;\red249\green249\blue249;\red36\green38\blue41;\red235\green236\blue237;
+\red43\green39\blue19;\red27\green29\blue31;\red255\green255\blue255;}
+{\*\expandedcolortbl;;\cssrgb\c9804\c9804\c9804;\cssrgb\c98039\c98039\c98039;\cssrgb\c0\c46667\c66667;
+\cssrgb\c43922\c50196\c56471;\cssrgb\c93333\c93333\c93333;\cssrgb\c17647\c17647\c17647;\cssrgb\c80000\c80000\c80000;\cssrgb\c60000\c60000\c60000;
+\cssrgb\c49412\c77647\c60000;\cssrgb\c9804\c9804\c9804;\cssrgb\c98039\c98039\c98039;\cssrgb\c18824\c20000\c21176;\cssrgb\c93725\c94118\c94510;
+\cssrgb\c22353\c20000\c9412;\cssrgb\c14118\c15294\c16078;\cssrgb\c100000\c100000\c100000;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 Game Bullshit\
+\
+Minimum of 3 players\
+How to play screen\
+Video capture\
+\
+Can never have only 2 players\
+\
+Create a room\
+Starts the game\
+\
+Starts at 2 - left of the first person in the room \
+Goes 3, 4, 5, 6, 7, 8, 9, 10, J, Q, K, A back to 2\
+\
+One video screen shows person whose turn it is\
+30 seconds to make turn \
+10 seconds to call bullshit\
+\
+If more than one person calls bullshit and they are incorrect the pot is split between them, the person who calls last gets the extra card if necessary\
+\
+Can skip turn\
+If runs out of time (30s) the players turn is automatically skipped\
+\
+Enter lobby If your the first person you choose when to start the game (when at least 3 people have entered)\
+\
+If you win you get a multiplier score \
+	1st * 50 \
+	2nd * 25\
+	3rd * 15\
+	4th* 10\
+	5th / 6th loss 0\
+	max six players\
+\
+If 6 people enter the lobby they are automatically put into a game and it starts\
+\
+Node\
+\
+Npm init - To create package - cute-files.js (for entry point)\
+\
+\pard\pardeftab720\sl340\partightenfactor0
+
+\f1 \cf2 \cb3 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 npm \cf4 \strokec4 install\cf2 \strokec2  commander \cf4 \strokec4 content\cf2 \strokec2 -disposition express \cf5 \strokec5 --save\cf2 \strokec2 \
+\
+Installs packages for commander - parses command line arguments, content-disposition - tell us the correct attatchment headers for each file, and express for the server\
+\
+Nodemon restarts the server any time any file that the server uses is saved. Saves time as you dont have to restart the server manually:\
+\
+\pard\pardeftab720\sl340\partightenfactor0
+
+\fs29\fsmilli14583 \cf6 \cb7 \strokec6 $ npm install nodemon --save-dev
+\fs24 \cf2 \cb3 \strokec2 \
+\pard\pardeftab720\sl340\partightenfactor0
+\cf2 \
+By adding dev it will not be part of final package\
+\
+\pard\pardeftab720\sl340\partightenfactor0
+
+\fs29\fsmilli14583 \cf8 \cb1 \strokec8 \{\cf6 \cb7 \strokec6 \
+  \cf9 \cb1 \strokec9 // ...\cf6 \cb7 \strokec6 \
+  \cf10 \cb1 \strokec10 "scripts"\cf8 \strokec8 :\cf6 \cb7 \strokec6  \cf8 \cb1 \strokec8 \{\cf6 \cb7 \strokec6 \
+    \cf10 \cb1 \strokec10 "dev"\cf8 \strokec8 :\cf6 \cb7 \strokec6  \cf10 \cb1 \strokec10 "nodemon server.js"\cf6 \cb7 \strokec6 \
+  \cf8 \cb1 \strokec8 \}\cf6 \cb7 \strokec6 \
+  \cf9 \cb1 \strokec9 // ...\cf6 \cb7 \strokec6 \
+\cf8 \cb1 \strokec8 \}\
+\
+\pard\pardeftab720\sl340\partightenfactor0
+
+\fs24 \cf11 \cb12 \outl0\strokewidth0 By adding the above to the scripts in package.json\
+\
+The program can be run with Nodemon by typing npm run dev\
+\
+To parse the data send from a form with a post request must install body parser\
+\
+Npm install body-parser\
+\
+To install mongodb \
+\
+\pard\pardeftab720\sl340\partightenfactor0
+
+\fs29\fsmilli14583 \cf6 \cb7 \outl0\strokewidth0 \strokec6 npm install mongodb --save
+\fs24 \cf11 \cb12 \outl0\strokewidth0 \
+\pard\pardeftab720\sl340\partightenfactor0
+\cf11 \
+\
+MongoDB\
+\
+With home-brew: \
+\
+Brew install mongodb\
+\
+\pard\pardeftab720\sl300\partightenfactor0
+
+\f2\fs26 \cf13 \cb14 \outl0\strokewidth0 \strokec13 brew services start mongodb\cf15 \strokec15 \
+\pard\pardeftab720\sl340\sa300\partightenfactor0
+
+\f3\fs30 \cf16 \cb17 \strokec16 Then access the shell by\
+\pard\pardeftab720\sl300\partightenfactor0
+
+\f2\fs26 \cf13 \cb14 \strokec13 mongo\cf15 \strokec15 \
+\pard\pardeftab720\sl340\sa300\partightenfactor0
+
+\f3\fs30 \cf16 \cb17 \strokec16 You can shut down your db by\
+\pard\pardeftab720\sl300\partightenfactor0
+
+\f2\fs26 \cf13 \cb14 \strokec13 brew services stop mongodb\cf15 \strokec15 \
+\pard\pardeftab720\sl340\sa300\partightenfactor0
+
+\f3\fs30 \cf16 \cb17 \strokec16 For more options\
+\pard\pardeftab720\sl300\partightenfactor0
+
+\f2\fs26 \cf13 \cb14 \strokec13 brew info mongodb\cf15 \strokec15 \
+\pard\pardeftab720\sl340\partightenfactor0
+
+\f1\fs24 \cf11 \cb12 \outl0\strokewidth0 \
+\
+\cf2 \cb3 \outl0\strokewidth0 \strokec2 \
+}
