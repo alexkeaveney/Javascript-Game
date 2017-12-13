@@ -30,15 +30,20 @@ MongoClient.connect('mongodb://127.0.0.1:27017', (err, database) => {
     console.log(err);
   }
   else {
-    db = database;
-    console.log(db);
-    console.log("connected to db");
+    db = database.db('cheat');
+
+
+
   }
   app.listen(8080, () => {
     console.log('listening on 8080');
+    // this.db.collection('users').insertOne({name: 'Joe', password: "test"});
   });
 
-  //console.log(collection.find());
+
+
+
+  //db.collection.insertOne({user: {name: 'Joe', password: "test"}});
 });
 
 //});
@@ -62,10 +67,40 @@ app.post('/', (req, res) => {
   // });
 
 
-  console.log(req.body.user.name);
-  console.log(req.body.user.password);
+  //console.log(req.body.user.name);
+
+  const user = req.body.user.name;
+  const pass = req.body.user.password;
+
+  //console.log(req.body.user.password);
 
   //check if the user is in the database
+
+  db.collection('users').findOne({}, function (findErr, result) {
+
+    //if the user exists
+    if (result !== null) {
+      if (pass === result.password) {
+          //sign him in
+      }
+      else {
+        //send back failed authentication error
+      }
+    }
+
+    //create a new user
+    else {
+       db.collection('users').insertOne({name: user, password: pass}, function(err, result) {
+         console.log(result);
+       });
+    }
+
+  });
+
+
+
+  //let result = db.collection('users').find( { name: user } );
+  //console.log(result);
 
   //if they are check credentials
     //create cookie / sign them in
