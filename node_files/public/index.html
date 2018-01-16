@@ -41,6 +41,9 @@
 
 
 
+
+
+
         <p>
 <!--            <a href="/lobby">-->
                 <button id='startButton'>Start game</button>
@@ -66,26 +69,17 @@
             userList.push(user);
           });
 
+          socket.on('login', function(result) {
+              console.log(result);
+          });
+
           //send the message to the server to give username / get added to userlist
-          document.getElementById('startButton').addEventListener('click', function() {
+          document.getElementById('login').addEventListener('click', function() {
             let flag = true;
             let user = document.getElementById('username').value;
             let error = document.getElementById('takenError').innerHTML;
 
-            if (user === undefined) {
-               error = "You must enter a name";
-               flag = false;
-            }
-            else {
-              userList.forEach(function(element) {
-                if (element === user) {
-                  error = "Username already taken";
-                  flag = false;
-                }
-              });
-            }
-
-            if (flag){ socket.emit('connectPlayer', user); }
+            //if (flag) { socket.emit('connectPlayer', user); }
 
 
           });

@@ -16,10 +16,13 @@
     "body-parser": "^1.18.2",
     "commander": "^2.12.2",
     "content-disposition": "^0.5.2",
+    "cookie-parser": "^1.4.3",
     "express": "^4.16.2",
+    "express-session": "^1.15.6",
     "mongodb": "^3.0.0-rc0",
     "socket.io": "^2.0.4",
-    "socketio": "^1.0.0"
+    "socketio": "^1.0.0",
+    "webcamstreaming-js": "^1.0.2"
   },
   "devDependencies": {
     "nodemon": "^1.12.6"
