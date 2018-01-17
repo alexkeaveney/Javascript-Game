@@ -1,0 +1,145 @@
+<html>
+    <head>
+        <title>Howiya</title>
+        <script src="../socket.io/socket.io.js"></script>
+        <style>
+            #startButton {
+                display: none;
+            }
+
+            #claim {
+                display: none;
+            }
+        </style>
+    </head>
+    <body>
+        <input type="text" id="username"><span id="error"></span>
+        <button id="loginButton">Login</button>
+        <button id="startButton">Start game</button>
+
+        <p id="messages"></p>
+        <div id="cardHolder"></div>
+        <button id="claim" onclick="claim()">Claim</button>
+        <script>
+
+            const socket = io.connect();
+            const messages = document.getElementById('messages');
+            const startButton = document.getElementById('startButton');
+            let yourTurn = false;
+            let turnCard = "";
+            let cards = [];
+            let selectedCards = [];
+
+            startButton.addEventListener('click', function() {
+                socket.emit('startGame', username);
+                startButton.style.display = 'none';
+                //messages.innerHTML = 'Starting game';
+            });
+
+            document.getElementById('loginButton').addEventListener('click', function() {
+
+                const username = document.getElementById('username').value;
+
+                if (username==="") {
+                    document.getElementById('error').innerHTML = "You have not typed in a username";
+                }
+                else {
+                    socket.emit ('connectPlayer', username);
+                    messages.innerHTML = "Player Connected"
+                    document.getElementById('username').style.display = 'none';
+                    document.getElementById('loginButton').style.display = 'none';
+                    document.getElementById('startButton').style.display = 'block';
+                }
+            });
+
+            socket.on('room', function(message) {
+                  messages.innerHTML = message;
+            });
+
+            socket.on('cards', function(messages) {
+                  let cardHolder = document.getElementById('cardHolder');
+                  //messages.innerHTML = message;
+                //   console.log(messages.hand);
+                //   console.log(messages.hand[0].suit);
+                //   console.log(messages.hand[0].rank);
+                  for (let i =0; i < messages.hand.length; i++) {
+                      let btn = document.createElement("BUTTON");
+
+                    // Create a <button> element
+                      let t = document.createTextNode(messages.hand[i].rank);
+                      btn.setAttribute("id", `${messages.hand[i].rank}${messages.hand[i].suit}`);
+                      btn.addEventListener('click', function() {
+                          if (yourTurn) {
+                             selectCard(`${messages.hand[i].rank}${messages.hand[i].suit}`);
+                          }
+
+                      });
+                          // Create a text node
+                      btn.appendChild(t);                                // Append the text to <button>
+                      cardHolder.appendChild(btn);
+                  }
+
+                  yourTurn = messages.move;
+                  console.log(yourTurn);
+                  turnCard = messages.turnCard;
+                  console.log(turnCard);
+
+                  if (yourTurn) {
+                      console.log("It is your turn to play " + turnCard + "'s");
+                      document.getElementById('messages').innerHTML = "It is your turn to play " + turnCard + "'s";
+                      document.getElementById('claim').style.display = 'block';
+                  }
+                  else {
+                      console.log("Its your opponents turn to play " + turnCard + "s");
+                      document.getElementById('messages').innerHTML = "Its your opponents turn to play " + turnCard + "s";
+                  }
+
+
+            });
+
+            socket.on('opponentmove', function(cards) {
+                console.log(cards);
+            });
+
+            function claim() {
+                document.getElementById('claim').style.display = 'none';
+                socket.emit('playerMove', selectedCards);
+
+            }
+
+            function selectCard(card) {
+
+                let alreadySelected = false;
+                for (let i = 0; i < selectedCards.length; i++) {
+                    console.log(card);
+                    if (card == selectedCards[i]) {
+                        alreadySelected = true;
+                        console.log("already selected");
+                    }
+                }
+                if (alreadySelected) {
+                    //unselect it
+                    const index = selectedCards.indexOf(card);
+                    selectedCards.splice(index, 1);
+                    document.getElementById(card).style.background = 'white';
+                    console.log(selectedCards);
+                }
+
+                if (selectedCards.length < 4) {
+                    if (!alreadySelected) {
+                        selectedCards.push(card);
+                        document.getElementById(card).style.background = 'green';
+                        console.log(selectedCards);
+                    }
+                }
+                else {
+                    document.getElementById('messages').innerHTML = "You cannot select more than 4 cards";
+                }
+
+
+            }
+        </script>
+
+
+    </body>
+</html>
