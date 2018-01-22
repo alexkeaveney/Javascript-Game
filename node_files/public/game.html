@@ -3,13 +3,13 @@
         <title>Howiya</title>
         <script src="../socket.io/socket.io.js"></script>
         <style>
-            #startButton {
+            #startButton, #claim, #bullshit  {
                 display: none;
             }
-
+/*
             #claim {
                 display: none;
-            }
+            }*/
         </style>
     </head>
     <body>
@@ -20,6 +20,7 @@
         <p id="messages"></p>
         <div id="cardHolder"></div>
         <button id="claim" onclick="claim()">Claim</button>
+        <button id="bullshit" onclick="bullshit()">Bullshit</button>
         <script>
 
             const socket = io.connect();
@@ -29,11 +30,11 @@
             let turnCard = "";
             let cards = [];
             let selectedCards = [];
+            let buttons = [];
 
             startButton.addEventListener('click', function() {
                 socket.emit('startGame', username);
                 startButton.style.display = 'none';
-                //messages.innerHTML = 'Starting game';
             });
 
             document.getElementById('loginButton').addEventListener('click', function() {
@@ -64,7 +65,6 @@
                 //   console.log(messages.hand[0].rank);
                   for (let i =0; i < messages.hand.length; i++) {
                       let btn = document.createElement("BUTTON");
-
                     // Create a <button> element
                       let t = document.createTextNode(messages.hand[i].rank);
                       btn.setAttribute("id", `${messages.hand[i].rank}${messages.hand[i].suit}`);
@@ -75,7 +75,15 @@
 
                       });
                           // Create a text node
-                      btn.appendChild(t);                                // Append the text to <button>
+                      btn.appendChild(t);
+                      let imageLink = `/images/${messages.hand[i].rank}_of_${messages.hand[i].suit.toLowerCase()}.png`;
+                      btn.innerHTML = "<img height='80' width='50' src='" + imageLink + "'/>";
+                      cards.push({
+                         suit: messages.hand[i].suit,
+                         rank: messages.hand[i].rank,
+                         button: btn
+                      });
+                                            // Append the text to <button>
                       cardHolder.appendChild(btn);
                   }
 
@@ -99,11 +107,94 @@
 
             socket.on('opponentmove', function(cards) {
                 console.log(cards);
+                document.getElementById('bullshit').style.display = 'block';
+                document.getElementById('messages').innerHTML = "Your opponent played " + cards.length + " " + turnCard + "s";
+
             });
+
+            socket.on('handresult', function(message) {
+                console.log(message.result);
+                console.log("Your turn = " + message.yourTurn);
+                document.getElementById('messages').innerHTML = message.result;
+                yourTurn = message.yourTurn;
+                if (yourTurn) {
+                    document.getElementById('messages').innerHTML = "It is your turn to play " + message.turnCard + "'s";
+                    document.getElementById('claim').style.display = 'block';
+                }
+                else {
+                    document.getElementById('messages').innerHTML = "Its your opponents turn to play " + message.turnCard + "s";
+                }
+
+                //clear cards
+                resetHand(message.cards);
+
+            });
+
+            function resetHand(hand) {
+                let holder = document.getElementById('cardHolder');
+                for (let i = 0; i < cards.length; i++) {
+                    holder.removeChild(cards[i].button);
+                }
+
+                //empty cards array
+                cards = [];
+
+                console.log("✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿");
+                console.log("cards length (should be 0)" + cards.length);
+                console.log("holder length (should be 0)" + holder.length);
+                console.log("✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿");
+
+                for (let i = 0; i < hand.length; i++) {
+                    let btn = document.createElement("BUTTON");
+                  // Create a <button> element
+                    let t = document.createTextNode(hand[i].rank);
+                    btn.setAttribute("id", `${hand[i].rank}${hand[i].suit}`);
+                    btn.addEventListener('click', function() {
+                        if (yourTurn) {
+                           selectCard(`${hand[i].rank}${hand[i].suit}`);
+                        }
+
+                    });
+                        // Create a text node
+                    btn.appendChild(t);
+                    let imageLink = `/images/${hand[i].rank}_of_${hand[i].suit.toLowerCase()}.png`;
+                    btn.innerHTML = "<img height='80' width='50' src='" + imageLink + "'/>";
+                    cards.push({
+                       suit: hand[i].suit,
+                       rank: hand[i].rank,
+                       button: btn
+                    });
+                                          // Append the text to <button>
+                    cardHolder.appendChild(btn);
+                }
+
+            }
+
+            function bullshit() {
+                socket.emit('bullshit', true);
+                document.getElementById('bullshit').style.display = 'none';
+            }
 
             function claim() {
                 document.getElementById('claim').style.display = 'none';
-                socket.emit('playerMove', selectedCards);
+                document.getElementById('cardHolder');
+                let selectedObjects = [];
+                for (let i =0; i < selectedCards.length; i++) {
+                    for (let x =0; x < cards.length; x++) {
+                        if (selectedCards[i].includes(cards[x].rank) && selectedCards[i].includes(cards[x].suit)) {
+                            selectedObjects.push(cards[x]);
+                            cardHolder.removeChild(cards[x].button);
+                            cards.splice(x, 1);
+
+                        }
+                    }
+                }
+                //empty selected cards
+                selectedCards = [];
+                socket.emit('playerMove', selectedObjects);
+
+                //remove the cards from players hand
+
 
             }
 
@@ -128,7 +219,7 @@
                 if (selectedCards.length < 4) {
                     if (!alreadySelected) {
                         selectedCards.push(card);
-                        document.getElementById(card).style.background = 'green';
+                        document.getElementById(card).style.background = '#2ecc71';
                         console.log(selectedCards);
                     }
                 }
