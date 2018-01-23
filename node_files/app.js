@@ -43,17 +43,17 @@ app.get('/', function(req, res) {
     res.sendFile(__dirname + '/public/game.html');
 });
 
-const MongoClient = require('mongodb').MongoClient
-
-MongoClient.connect('mongodb://127.0.0.1:27017', (err, database) => {
-
-    if (err) { console.log(err); }
-    else { db = database.db('cheat'); }
-
-    app.listen(8080, () => {
-        console.log('Database connected');
-    });
-});
+// const MongoClient = require('mongodb').MongoClient
+//
+// MongoClient.connect('mongodb://127.0.0.1:27017', (err, database) => {
+//
+//     if (err) { console.log(err); }
+//     else { db = database.db('cheat'); }
+//
+//     app.listen(8080, () => {
+//         console.log('Database connected');
+//     });
+// });
 
 
 
@@ -412,4 +412,4 @@ io.on('connection', function(socket) {
 
 
 
-server.listen(3000);
+server.listen(8080);
