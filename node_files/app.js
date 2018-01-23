@@ -1,3 +1,4 @@
+'use strict';
 
 const express = require('express');
 const app = express();
@@ -7,6 +8,8 @@ const parser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
 var path = require('path');
+var os = require('os');
+var nodeStatic = require('node-static');
 
 //classes
 const Card = require('./classes/Card.js');
@@ -23,6 +26,9 @@ let games = [];
 app.use(express.static(__dirname + '/node_modules'));
 app.use(express.static(__dirname + '/classes'));
 app.use(express.static(__dirname + '/public/images'));
+// var filePath = path.join(__dirname, '../js/lib/adapter.js');
+
+app.use(express.static('js/lib'));
 app.use(express.static('public'));
 
 
@@ -83,7 +89,7 @@ io.on('connection', function(socket) {
             socket.join(new_room);
             socket.join(new_room, function () {
                 //console.log(socket.id + " now in rooms ", socket.rooms);
-                io.sockets.to(new_room).emit('room', 'new room created called ' + new_room);
+                io.sockets.to(new_room).emit('room', 'new room created');
             });
         }
         else if (io.sockets.adapter.rooms[rooms[rooms.length-1]].length < 2) {
@@ -119,7 +125,7 @@ io.on('connection', function(socket) {
             socket.room = new_room;
             socket.join(new_room, function () {
                 //console.log(socket.id + " now in rooms ", socket.rooms);
-                io.sockets.to(new_room).emit('room', 'new room created called ' + new_room);
+                io.sockets.to(new_room).emit('room', 'new room created');
             });
         }
 
@@ -231,6 +237,46 @@ io.on('connection', function(socket) {
         }
     });
 
+    socket.on('message', function(message) {
+
+  // for a real app, would be room-only (not broadcast)
+        console.log(message);
+        if (message=="bye") {
+            socket.broadcast.emit('message', message);
+        }
+        else {
+            if (games !== undefined && games.length > 0) {
+                console.log("🐽🐽🐽🐽🐽🐽🐽🐽🐽🐽🐽🐽🐽");
+                console.log(games.length);
+                                console.log("🐽🐽🐽🐽🐽🐽🐽🐽🐽🐽🐽🐽🐽");
+                for (let i = 0; i < games.length; i++) {
+                    console.log(games[0].players.length);
+                     for (let x = 0; x < games[i].players.length; x++) {
+                         console.log("🦐🦐🦐🦐🦐🦐🦐🦐🦐🦐🦐🦐🦐🦐🦐");
+                         if (games[i].players[x].getSocket() == socket.id) {
+                             io.sockets.sockets[games[i].players[0].getSocket()].emit('message', message);
+                             io.sockets.sockets[games[i].players[1].getSocket()].emit('message', message);
+                         }
+                     }
+                }
+            }
+        }
+
+
+    });
+
+    socket.on('ipaddr', function() {
+      var ifaces = os.networkInterfaces();
+      for (var dev in ifaces) {
+        ifaces[dev].forEach(function(details) {
+          if (details.family === 'IPv4' && details.address !== '127.0.0.1') {
+            socket.emit('ipaddr', details.address);
+          }
+        });
+      }
+    });
+
+
     function setup(room) {
 
         //find out whos in the room
@@ -294,7 +340,7 @@ io.on('connection', function(socket) {
         //create a game object
         let deck = new Deck();
         deck.shuffle();
-        cards = deck.getCards();
+        let cards = deck.getCards();
 
         let players = [];
         let player1 = new Player(users[userIDs[0]].user, 0, sockets[0], 1);

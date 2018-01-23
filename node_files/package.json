@@ -20,6 +20,7 @@
     "express": "^4.16.2",
     "express-session": "^1.15.6",
     "mongodb": "^3.0.0-rc0",
+    "node-static": "^0.7.10",
     "socket.io": "^2.0.4",
     "socketio": "^1.0.0",
     "webcamstreaming-js": "^1.0.2"
