@@ -144,6 +144,9 @@ io.on('connection', function(socket) {
             if (socket.id == games[i].whoseTurn) {
                 // console.log("")
                 games[i].makeTurn(claimCards, socket);
+                console.log("🐔🐔🐔🐔🐔🐔🐔🐔🐔🐔🐔🐔🐔🐔🐔🐔🐔🐔🐔🐔🐔🐔🐔🐔🐔🐔🐔");
+                console.log("Should be 3" + games[i].turn);
+                console.log("🐔🐔🐔🐔🐔🐔🐔🐔🐔🐔🐔🐔🐔🐔🐔🐔🐔🐔🐔🐔🐔🐔🐔🐔🐔🐔🐔");
                 let opponent;
                 console.log("👀👀👀👀👀👀👀👀👀👀👀👀👀👀👀👀");
                 console.log("socket id is equal to whoseturn");
@@ -200,18 +203,29 @@ io.on('connection', function(socket) {
                 console.log("Caller hand = " + caller.getHand().length);
                 console.log("&&&&&&&&&&&&&&&&&&&&&&&&&&&");
 
+                let playerwin = 'none';
+
+                if (player.getHand().length == 0) {
+                    playerwin = player.username;
+                }
+                if (caller.getHand().length == 0) {
+                    playerwin = caller.username;
+                }
+
                 if (result) {
                     io.sockets.sockets[caller.getSocket()].emit('handresult', {
                         result: "You caught " + player.username + " bullshitting. They take the pile",
                         yourTurn: true,
                         turnCard: games[i].cardsOrder[games[i].turn],
-                        cards: caller.getHand()
+                        cards: caller.getHand(),
+                        win: playerwin
                     });
                     io.sockets.sockets[player.getSocket()].emit('handresult', {
                         result: caller.username + " caught you bullshitting. You take the pile",
                         yourTurn: false,
                         turnCard: games[i].cardsOrder[games[i].turn],
-                        cards: player.getHand()
+                        cards: player.getHand(),
+                        win: playerwin
                     });
                 }
                 else {
@@ -219,13 +233,15 @@ io.on('connection', function(socket) {
                         result: player.username + " wasnt bullshitting. You take the pile",
                         yourTurn: true,
                         turnCard: games[i].cardsOrder[games[i].turn],
-                        cards: caller.getHand()
+                        cards: caller.getHand(),
+                        win: playerwin
                     });
                     io.sockets.sockets[player.getSocket()].emit('handresult', {
                         result: caller.username + " called bullshit when you told the truth. They take the pile",
                         yourTurn: false,
                         turnCard: games[i].cardsOrder[games[i].turn],
-                        cards: player.getHand()
+                        cards: player.getHand(),
+                        win: playerwin
                     });
                 }
             }
@@ -233,6 +249,42 @@ io.on('connection', function(socket) {
         else {
             //move on to the next turn
             console.log("No bullshit call");
+            let caller, player, game;
+            for (let i = 0; i < games.length; i++) {
+                for (let x = 0; x < games[i].players.length; x++) {
+                    console.log("in second for loop");
+                    if (socket.id == games[i].players[x].socket) {
+                        caller = games[i].players[x];
+                        game = i;
+                        console.log("caller" + caller.username);
+                    }
+                    else {
+                        player = games[i].players[x];
+                        console.log("player" + player.username);
+                    }
+                }
+            }
+
+            let current_game = games[game];
+            current_game.dontCallCheat(caller.socket);
+            let current_card = games[game].turn;
+
+            console.log("current_card===" + current_card);
+
+            let turn_card = current_game.cardsOrder[current_card];
+
+            console.log("turn_card===" + turn_card);
+
+            console.log("whose_turn===" + games[game].whoseTurn);
+
+            io.sockets.sockets[player.getSocket()].emit('nobullshit', {
+                whoseTurn: caller.username,
+                turnCard: turn_card
+            });
+            io.sockets.sockets[caller.getSocket()].emit('nobullshit', {
+                whoseTurn: caller.username,
+                turnCard: turn_card
+            });
 
         }
     });
@@ -322,21 +374,6 @@ io.on('connection', function(socket) {
             }
         }
 
-        //console.log("usernames: " + usernames);
-
-
-        // for (let i =0; i < users.length; i++) {
-        //     if (users[i].socket == sockets[0]) {
-        //         userIDs.push(i);
-        //     }
-        // }
-        //
-        // for (let i =0; i < users.length; i++) {
-        //     if (users[i].socket == sockets[1]) {
-        //         userIDs.push(i);
-        //     }
-        // }
-
         //create a game object
         let deck = new Deck();
         deck.shuffle();
@@ -366,16 +403,6 @@ io.on('connection', function(socket) {
 
 
         return game;
-        // let hand1 = players[0].getHand();
-        // let hand2 = players[1].getHand();
-        //
-        // for (let i = 0; i < hand1.length; i++) {
-        //     console.log(`${hand1[i].rank} of ${hand1[i].suit}`);
-        // }
-        //
-        // for (let i = 0; i < hand2.length; i++) {
-        //     console.log(`${hand2[i].rank} of ${hand2[i].suit}`);
-        // }
 
     }
 

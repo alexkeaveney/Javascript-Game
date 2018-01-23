@@ -21,7 +21,7 @@
         <p id="messages"></p>
         <div id="cardHolder"></div>
         <button id="claim" onclick="claim()">Claim</button>
-        <button id="bullshit" onclick="bullshit()">Bullshit</button>
+        <button id="bullshit" onclick="bullshit(true)">Bullshit</button>
         <div id="videos">
           <video id="localVideo" autoplay muted></video>
           <video id="remoteVideo" autoplay></video>
@@ -56,6 +56,7 @@
             let cards = [];
             let selectedCards = [];
             let buttons = [];
+            let name = "";
 
             startButton.addEventListener('click', function() {
                 socket.emit('startGame', username);
@@ -70,6 +71,7 @@
                     document.getElementById('error').innerHTML = "You have not typed in a username";
                 }
                 else {
+                    name = username;
                     socket.emit ('connectPlayer', username);
                     messages.innerHTML = "Player Connected";
                     document.getElementById('username').style.display = 'none';
@@ -433,8 +435,44 @@ function removeCN(sdpLines, mLineIndex) {
 
             socket.on('opponentmove', function(cards) {
                 console.log(cards);
-                document.getElementById('bullshit').style.display = 'block';
+                let bullshitButton = document.getElementById('bullshit');
+                bullshitButton.style.display = 'block';
                 document.getElementById('messages').innerHTML = "Your opponent played " + cards.length + " " + turnCard + "s";
+
+                let seconds = 20,
+                second = 0,
+                interval;
+
+                interval = setInterval(function() {
+                console.log(seconds - second);
+                let num = seconds - second;
+                bullshitButton.innerHTML = `Bullshit(${num})`;
+                if (second >= seconds) {
+                    //bullshitButton.style.display = 'none';
+                    bullshit(false);
+                    clearInterval(interval);
+                }
+                second++;
+                }, 1000);
+            });
+
+            socket.on('nobullshit', function(message) {
+                console.log('no bullshit');
+                console.log(message);
+                console.log(message.whoseTurn);
+                console.log("username===" + name);
+                if (message.whoseTurn == name) {
+                    console.log("its your turn")
+                    yourTurn = true;
+                    turnCard = message.turnCard;
+                    document.getElementById('messages').innerHTML = "It's your turn to play " + turnCard + "s";
+                    document.getElementById('claim').style.display = 'block';
+                }
+                else {
+                    yourTurn = false;
+                    turnCard = message.turnCard;
+                    document.getElementById('messages').innerHTML = "It's your opponents turn to play " + turnCard + "s";
+                }
 
             });
 
@@ -443,16 +481,33 @@ function removeCN(sdpLines, mLineIndex) {
                 console.log("Your turn = " + message.yourTurn);
                 document.getElementById('messages').innerHTML = message.result;
                 yourTurn = message.yourTurn;
-                if (yourTurn) {
-                    document.getElementById('messages').innerHTML = "It is your turn to play " + message.turnCard + "'s";
-                    document.getElementById('claim').style.display = 'block';
-                }
-                else {
-                    document.getElementById('messages').innerHTML = "Its your opponents turn to play " + message.turnCard + "s";
+
+                //no one won - continue game
+                if (message.win == "none") {
+                    if (yourTurn) {
+                        document.getElementById('messages').innerHTML = "It is your turn to play " + message.turnCard + "'s";
+                        document.getElementById('claim').style.display = 'block';
+                    }
+                    else {
+                        document.getElementById('messages').innerHTML = "Its your opponents turn to play " + message.turnCard + "s";
+                    }
+
+                    //clear cards
+                    resetHand(message.cards);
                 }
 
-                //clear cards
-                resetHand(message.cards);
+                //you won
+                else if(message.win == username) {
+                    alert("You win!");
+                }
+
+                //your opponent one
+                else {
+                    alert("You lose!");
+                }
+
+
+
 
             });
 
@@ -490,14 +545,15 @@ function removeCN(sdpLines, mLineIndex) {
                        rank: hand[i].rank,
                        button: btn
                     });
-                                          // Append the text to <button>
+                    // Append the text to <button>
                     cardHolder.appendChild(btn);
                 }
 
             }
 
-            function bullshit() {
-                socket.emit('bullshit', true);
+            function bullshit(bool) {
+                console.log("bullshit funciton started");
+                socket.emit('bullshit', bool);
                 document.getElementById('bullshit').style.display = 'none';
             }
 

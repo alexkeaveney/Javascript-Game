@@ -15,25 +15,27 @@ module.exports = class Game {
     this.whoseTurn = players[0].socket;
   }
 
-  playGame() {
 
-    //   while (!this.gameOver) {
-    //       //check if anyone won
-    //       if (this.players[0].countHand() == 0) {
-    //           console.log(`${this.players[0].username} won`);
-    //           this.winner = this.players[0];
-    //           this.gameOver = true;
-    //       }
-    //       else if (this.players[1].countHand() == 0) {
-    //           console.log(`${this.players[1].username} won`);
-    //           this.winner = this.players[1];
-    //           this.gameOver = true;
-    //       }
-    //   }
-  }
 
   whoseTurn() {
       return this.whoseTurn;
+  }
+
+  dontCallCheat(socket) {
+
+    //   if (this.turn == this.cardsOrder.length) {
+    //       this.turn = 0;
+    //   }
+    //   else {
+    //       this.turn = this.turn + 1;
+    //   }
+
+    //   for (let i = 0; i < this.players.length; i++) {
+    //       if (this.players[i].socket != socket) {
+    //           this.whoseTurn = this.players[i].socket;
+    //       }
+    //   }
+
   }
 
   callCheat (caller, player) { 
@@ -90,22 +92,10 @@ module.exports = class Game {
       console.log("Current player " + current_player.username);
       let cardsSelected = [];
 
-      //console.log(current_player.getHand());
-    //   console.log("************current player hand*******************");
-    //   console.log(current_player.getHand());
-    //   console.log("************current player hand*******************");
-      //
-    //   console.log("****************selected cards********************");
-    //   console.log(selectedCards);
-    //   console.log("****************selected cards********************");
-
       for (let i =0; i < current_player.getHand().length; i++) {
           for (let y = 0; y < selectedCards.length; y++) {
               if (current_player.getHand()[i].rank == selectedCards[y].rank && current_player.getHand()[i].suit == selectedCards[y].suit) {
                   cardsSelected.push(current_player.getHand()[i]);
-                  //console.log(current_player.getHand()[i]);
-                  //console.log("condition true");
-
               }
           }
       }
@@ -129,7 +119,7 @@ module.exports = class Game {
           this.turn = 0;
       }
       else {
-          this.turn++;
+          this.turn = this.turn + 1;
       }
   }
 
