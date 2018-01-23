@@ -4,13 +4,13 @@ module.exports = class Game {
 
   constructor(players) {
     this.players = players;
+    this.turn = 0;
     this.gameOver = false;
     this.cardsOrder = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King", "Ace"];
     this.turnHand = [];
     this.selectedCards = [];
     this.pile = [];
-    this.currentTurn = 0; //incremented at the end of a turn (after bullshit called)
-    this.nextTurn = 0; //incremented after a player has made a move
+    this.currentCard = 0;
     this.winner;
     this.whoseTurn = players[0].socket;
   }
@@ -23,14 +23,18 @@ module.exports = class Game {
 
   dontCallCheat(socket) {
 
-      if (this.currentTurn == this.cardsOrder.length) {
-          this.currentTurn = 0;
-      }
-      else {
-          this.currentTurn = this.currentTurn + 1;
-      }
+    //   if (this.turn == this.cardsOrder.length) {
+    //       this.turn = 0;
+    //   }
+    //   else {
+    //       this.turn = this.turn + 1;
+    //   }
 
-      this.whoseTurn = socket;
+    //   for (let i = 0; i < this.players.length; i++) {
+    //       if (this.players[i].socket != socket) {
+    //           this.whoseTurn = this.players[i].socket;
+    //       }
+    //   }
 
   }
 
@@ -46,7 +50,7 @@ module.exports = class Game {
       let caught = false;
       for (let i =0; i < this.turnHand.length; i++) {
 
-  		    if (this.cardsOrder[this.currentTurn] != this.turnHand[i].rank) {
+  		    if (this.cardsOrder[this.currentCard] != this.turnHand[i].rank) {
               caught = true;
           }
   	   }
@@ -60,13 +64,6 @@ module.exports = class Game {
             caller.addtoHand(this.pile);
             this.pile = [];
             console.log(`${player.username} wasn't bullshitting, take the pile`);
-       }
-
-       if (this.currentTurn == this.cardsOrder.length) {
-           this.currentTurn = 0;
-       }
-       else {
-           this.currentTurn = this.currentTurn + 1;
        }
 
        this.whoseTurn = caller.socket;
@@ -107,14 +104,22 @@ module.exports = class Game {
       for (let i =0; i < cardsSelected.length; i++) {
           this.pile.push(cardsSelected[i]);
       }
+      console.log("***************Pile******************");
+      console.log(this.pile);
+      console.log("***************Pile******************");
+      //console.log(cardsSelected);
+
+      //put them in the pile
+
+      //allow the other user to call bullshit
 
       this.turnHand = cardsSelected;
 
-      if (this.nextTurn == this.cardsOrder.length) {
-          this.nextTurn = 0;
+      if (this.turn == this.cardsOrder.length) {
+          this.turn = 0;
       }
       else {
-          this.nextTurn = this.nextTurn + 1;
+          this.turn = this.turn + 1;
       }
   }
 

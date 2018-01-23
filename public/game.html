@@ -4,13 +4,50 @@
         <script src="../socket.io/socket.io.js"></script>
           <script src="adapter.js"></script>
         <style>
-            #startButton, #claim, #bullshit  {
+            #startButton, #claim, #bullshit, #localVideo  {
                 display: none;
             }
-/*
+
+            #remoteVideo {
+                width: 480px;
+                height: 360px;
+            }
+
+            #videos, #messages {
+                text-align: center;
+                color: white;
+                font-family: sans-serif;
+            }
+
+            #cardHolder {
+                margin-top: 20px;
+            }
+
             #claim {
-                display: none;
-            }*/
+                margin-top: 20px;
+                background-color: yellow;
+                /*width: 100px;
+                height: 100px;*/
+                font-size: 14pt;
+                border: 2px solid black;
+                margin: 0 auto;
+            }
+
+            #bullshit {
+                margin-top: 20px;
+                background-color: red;
+                color: white;
+                /*width: 100px;
+                height: 100px;*/
+                font-size: 14pt;
+                border: 2px solid black;
+                margin: 0 auto;
+            }
+
+            body {
+                background-color: green;
+            }
+
         </style>
     </head>
     <body>
@@ -19,13 +56,15 @@
         <button id="startButton">Start game</button>
 
         <p id="messages"></p>
-        <div id="cardHolder"></div>
-        <button id="claim" onclick="claim()">Claim</button>
-        <button id="bullshit" onclick="bullshit(true)">Bullshit</button>
         <div id="videos">
           <video id="localVideo" autoplay muted></video>
           <video id="remoteVideo" autoplay></video>
         </div>
+        <button id="claim" onclick="claim()">Claim</button>
+        <button id="bullshit" onclick="bullshit(true)">Bullshit</button>
+        <div id="cardHolder"></div>
+
+
         <script>
             'use strict';
 
@@ -57,6 +96,7 @@
             let selectedCards = [];
             let buttons = [];
             let name = "";
+            let interval;
 
             startButton.addEventListener('click', function() {
                 socket.emit('startGame', username);
@@ -400,6 +440,7 @@ function removeCN(sdpLines, mLineIndex) {
                           if (yourTurn) {
                              selectCard(`${messages.hand[i].rank}${messages.hand[i].suit}`);
                           }
+                          clearInterval(interval);
 
                       });
                           // Create a text node
@@ -439,9 +480,8 @@ function removeCN(sdpLines, mLineIndex) {
                 bullshitButton.style.display = 'block';
                 document.getElementById('messages').innerHTML = "Your opponent played " + cards.length + " " + turnCard + "s";
 
-                let seconds = 20,
-                second = 0,
-                interval;
+                let seconds = 5,
+                second = 0;
 
                 interval = setInterval(function() {
                 console.log(seconds - second);
@@ -461,18 +501,28 @@ function removeCN(sdpLines, mLineIndex) {
                 console.log(message);
                 console.log(message.whoseTurn);
                 console.log("username===" + name);
-                if (message.whoseTurn == name) {
-                    console.log("its your turn")
-                    yourTurn = true;
-                    turnCard = message.turnCard;
-                    document.getElementById('messages').innerHTML = "It's your turn to play " + turnCard + "s";
-                    document.getElementById('claim').style.display = 'block';
+                if (message.win=="none") {
+                    if (message.whoseTurn == name) {
+                        console.log("its your turn")
+                        yourTurn = true;
+                        turnCard = message.turnCard;
+                        document.getElementById('messages').innerHTML = "It's your turn to play " + turnCard + "s";
+                        document.getElementById('claim').style.display = 'block';
+                    }
+                    else {
+                        yourTurn = false;
+                        turnCard = message.turnCard;
+                        document.getElementById('messages').innerHTML = "It's your opponents turn to play " + turnCard + "s";
+                    }
+                }
+                else if (message.win == name) {
+                    document.getElementById('messages').innerHTML = "You win";
                 }
                 else {
-                    yourTurn = false;
-                    turnCard = message.turnCard;
-                    document.getElementById('messages').innerHTML = "It's your opponents turn to play " + turnCard + "s";
+                    document.getElementById('messages').innerHTML = "You lose";
                 }
+
+
 
             });
 
@@ -481,6 +531,7 @@ function removeCN(sdpLines, mLineIndex) {
                 console.log("Your turn = " + message.yourTurn);
                 document.getElementById('messages').innerHTML = message.result;
                 yourTurn = message.yourTurn;
+                turnCard = message.turnCard;
 
                 //no one won - continue game
                 if (message.win == "none") {
@@ -520,11 +571,6 @@ function removeCN(sdpLines, mLineIndex) {
                 //empty cards array
                 cards = [];
 
-                console.log("✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿");
-                console.log("cards length (should be 0)" + cards.length);
-                console.log("holder length (should be 0)" + holder.length);
-                console.log("✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿✌🏿");
-
                 for (let i = 0; i < hand.length; i++) {
                     let btn = document.createElement("BUTTON");
                   // Create a <button> element
@@ -534,7 +580,7 @@ function removeCN(sdpLines, mLineIndex) {
                         if (yourTurn) {
                            selectCard(`${hand[i].rank}${hand[i].suit}`);
                         }
-
+                        clearInterval(interval);
                     });
                         // Create a text node
                     btn.appendChild(t);
@@ -558,22 +604,31 @@ function removeCN(sdpLines, mLineIndex) {
             }
 
             function claim() {
-                document.getElementById('claim').style.display = 'none';
-                document.getElementById('cardHolder');
-                let selectedObjects = [];
-                for (let i =0; i < selectedCards.length; i++) {
-                    for (let x =0; x < cards.length; x++) {
-                        if (selectedCards[i].includes(cards[x].rank) && selectedCards[i].includes(cards[x].suit)) {
-                            selectedObjects.push(cards[x]);
-                            cardHolder.removeChild(cards[x].button);
-                            cards.splice(x, 1);
+                if (selectedCards.length > 0) {
+                    document.getElementById('claim').style.display = 'none';
+                    document.getElementById('messages').innerHTML = "Waiting on opponents response...";
 
+                    let selectedObjects = [];
+                    for (let i =0; i < selectedCards.length; i++) {
+                        for (let x =0; x < cards.length; x++) {
+                            if (selectedCards[i].includes(cards[x].rank) && selectedCards[i].includes(cards[x].suit)) {
+                                selectedObjects.push(cards[x]);
+                                cardHolder.removeChild(cards[x].button);
+                                cards.splice(x, 1);
+
+                            }
                         }
                     }
+                    //empty selected cards
+                    selectedCards = [];
+
+                    //send selected messages to server
+                    socket.emit('playerMove', selectedObjects);
                 }
-                //empty selected cards
-                selectedCards = [];
-                socket.emit('playerMove', selectedObjects);
+                else {
+                    document.getElementById('messages').innerHTML = "You must select atleast 1 card";
+                }
+
 
                 //remove the cards from players hand
 
