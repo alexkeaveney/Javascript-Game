@@ -2,7 +2,7 @@
   "name": "node_files",
   "version": "1.0.0",
   "description": "This package holds the files for the real-time cheat card game",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "dev": "nodemon app.js"
   },
