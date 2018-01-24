@@ -4,7 +4,7 @@
         <script src="../socket.io/socket.io.js"></script>
           <script src="adapter.js"></script>
         <style>
-            #startButton, #claim, #bullshit, #localVideo  {
+            #startButton, #bullshit, #localVideo, #skip, #claim  {
                 display: none;
             }
 
@@ -23,13 +23,25 @@
                 margin-top: 20px;
             }
 
+            #turnButtons {
+                margin: 0 auto;
+                text-align: center;
+            }
+
             #claim {
                 margin-top: 20px;
                 background-color: yellow;
-                /*width: 100px;
-                height: 100px;*/
                 font-size: 14pt;
                 border: 2px solid black;
+                margin: 0 auto;
+            }
+
+            #skip {
+                margin-top: 20px;
+                background-color: blue;
+                font-size: 14pt;
+                border: 2px solid black;
+                color: white;
                 margin: 0 auto;
             }
 
@@ -37,8 +49,6 @@
                 margin-top: 20px;
                 background-color: red;
                 color: white;
-                /*width: 100px;
-                height: 100px;*/
                 font-size: 14pt;
                 border: 2px solid black;
                 margin: 0 auto;
@@ -60,7 +70,12 @@
           <video id="localVideo" autoplay muted></video>
           <video id="remoteVideo" autoplay></video>
         </div>
-        <button id="claim" onclick="claim()">Claim</button>
+
+        <div id="turnButtons">
+            <button id="claim" onclick="claim()">Claim</button>
+            <button id="skip" onclick="skip()">Skip turn</button>
+        </div>
+
         <button id="bullshit" onclick="bullshit(true)">Bullshit</button>
         <div id="cardHolder"></div>
 
@@ -124,11 +139,7 @@
                   messages.innerHTML = message;
                   if (message=='new room created') {
                       isInitiator = true;
-                      console.log("set isInitiator =" +isInitiator);
-                      //isStarted = false;
-                      //maybeStart();
 
-                      console.log("is initiator " + isInitiator);
                   }
                   else {
                       isChannelReady = true;
@@ -227,9 +238,9 @@ function maybeStart() {
   }
 }
 
-window.onbeforeunload = function() {
-  sendMessage('bye');
-};
+// window.onbeforeunload = function() {
+//   sendMessage('bye');
+// };
 
 /////////////////////////////////////////////////////////
 
@@ -464,7 +475,8 @@ function removeCN(sdpLines, mLineIndex) {
                   if (yourTurn) {
                       console.log("It is your turn to play " + turnCard + "'s");
                       document.getElementById('messages').innerHTML = "It is your turn to play " + turnCard + "'s";
-                      document.getElementById('claim').style.display = 'block';
+                      document.getElementById('claim').style.display = 'inline';
+                      document.getElementById('skip').style.display = 'inline';
                   }
                   else {
                       console.log("Its your opponents turn to play " + turnCard + "s");
@@ -507,7 +519,8 @@ function removeCN(sdpLines, mLineIndex) {
                         yourTurn = true;
                         turnCard = message.turnCard;
                         document.getElementById('messages').innerHTML = "It's your turn to play " + turnCard + "s";
-                        document.getElementById('claim').style.display = 'block';
+                        document.getElementById('claim').style.display = 'inline';
+                        document.getElementById('skip').style.display = "inline";
                     }
                     else {
                         yourTurn = false;
@@ -517,9 +530,16 @@ function removeCN(sdpLines, mLineIndex) {
                 }
                 else if (message.win == name) {
                     document.getElementById('messages').innerHTML = "You win";
+                    //hangs up the call
+                    removeGameElements();
+                    socket.emit('message', 'bye');
+                    socket.emit('endgame', name);
                 }
                 else {
                     document.getElementById('messages').innerHTML = "You lose";
+                    //hangs up the call
+                    removeGameElements();
+                    socket.emit('message', 'bye');
                 }
 
 
@@ -537,7 +557,9 @@ function removeCN(sdpLines, mLineIndex) {
                 if (message.win == "none") {
                     if (yourTurn) {
                         document.getElementById('messages').innerHTML = "It is your turn to play " + message.turnCard + "'s";
-                        document.getElementById('claim').style.display = 'block';
+                        document.getElementById('claim').style.display = 'inline';
+                        document.getElementById('skip').style.display = 'inline';
+
                     }
                     else {
                         document.getElementById('messages').innerHTML = "Its your opponents turn to play " + message.turnCard + "s";
@@ -548,18 +570,45 @@ function removeCN(sdpLines, mLineIndex) {
                 }
 
                 //you won
-                else if(message.win == username) {
+                else if(message.win == name) {
                     alert("You win!");
+                    //hangs up the call
+                    socket.emit('message', 'bye');
+                    removeGameElements();
+                    socket.emit('endgame', name);
                 }
 
                 //your opponent one
                 else {
                     alert("You lose!");
+                    //hangs up the call
+                    removeGameElements();
+                    socket.emit('message', 'bye');
                 }
 
 
 
 
+            });
+
+            function removeGameElements() {
+                document.getElementById('remoteVideo').style.display = 'none';
+                document.getElementById('cardHolder').style.display = 'none';
+            }
+
+            socket.on('skipturn', function(message) {
+                if (message.yourTurn) {
+                    yourTurn = true;
+                    turnCard = message.turnCard;
+                    document.getElementById('messages').innerHTML = "It's your turn to play " + turnCard + "s";
+                    document.getElementById('claim').style.display = 'inline';
+                    document.getElementById('skip').style.display = "inline";
+                }
+                else {
+                    yourTurn = false;
+                    turnCard = message.turnCard;
+                    document.getElementById('messages').innerHTML = "It's your opponents turn to play " + turnCard + "s";
+                }
             });
 
             function resetHand(hand) {
@@ -603,9 +652,18 @@ function removeCN(sdpLines, mLineIndex) {
                 document.getElementById('bullshit').style.display = 'none';
             }
 
+            function skip() {
+
+                document.getElementById('claim').style.display = 'none';
+                document.getElementById('skip').style.display = 'none';
+                socket.emit('skipmove', true);
+                console.log("turn skipped");
+            }
+
             function claim() {
                 if (selectedCards.length > 0) {
                     document.getElementById('claim').style.display = 'none';
+                    document.getElementById('skip').style.display = 'none';
                     document.getElementById('messages').innerHTML = "Waiting on opponents response...";
 
                     let selectedObjects = [];
@@ -615,7 +673,6 @@ function removeCN(sdpLines, mLineIndex) {
                                 selectedObjects.push(cards[x]);
                                 cardHolder.removeChild(cards[x].button);
                                 cards.splice(x, 1);
-
                             }
                         }
                     }
@@ -628,11 +685,7 @@ function removeCN(sdpLines, mLineIndex) {
                 else {
                     document.getElementById('messages').innerHTML = "You must select atleast 1 card";
                 }
-
-
                 //remove the cards from players hand
-
-
             }
 
             function selectCard(card) {
@@ -653,7 +706,7 @@ function removeCN(sdpLines, mLineIndex) {
                     console.log(selectedCards);
                 }
 
-                if (selectedCards.length < 4) {
+                if (selectedCards.length < 4 || name == 'a') {
                     if (!alreadySelected) {
                         selectedCards.push(card);
                         document.getElementById(card).style.background = '#2ecc71';

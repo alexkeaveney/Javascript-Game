@@ -26,18 +26,9 @@ let games = [];
 app.use(express.static(__dirname + '/node_modules'));
 app.use(express.static(__dirname + '/classes'));
 app.use(express.static(__dirname + '/public/images'));
-// var filePath = path.join(__dirname, '../js/lib/adapter.js');
-
 app.use(express.static('js/lib'));
 app.use(express.static('public'));
 
-
-//app.use(express.static(path.resolve('./public')));
-app.use(session({secret: 'keyboard cat', resave: false, saveUninitialized: true,cookie: { path: '/', httpOnly: true, maxAge: 30 * 30000 },rolling: true}));
-//parses the url
-app.use(parser.urlencoded({ extended: true}));
-// Parses the text as JSON and exposes the resulting object on req.body.
-app.use(parser.json());
 
 app.get('/', function(req, res) {
     res.sendFile(__dirname + '/public/game.html');
@@ -51,8 +42,6 @@ MongoClient.connect('mongodb://127.0.0.1:27017', (err, database) => {
     else {
         db = database.db('cheat');
     }
-
-
 
     app.listen(8000, () => {
         console.log('Database connected');
@@ -69,51 +58,34 @@ io.on('connection', function(socket) {
     socket.emit("userList", users);
 
     socket.on('connectPlayer', function(username) {
-        console.log("session id" + socket.id);
-        console.log("User connected: " + username);
+
         socket.nickname = username;
-        // const user = {user: username, socket: socket.id, score: 0};
-        // users.push(user);
         let user_new;
-        //collection.insert(doc2, {w:1}, function(err, result) {});
         var collection = db.collection('users');
+
         collection.findOne({ name: username }, function (err, user) {
-            if (err) {
-                console.log(err);
-                return
-            }
+            if (err) { console.log(err); return;}
             else {
                 if (user) {
-                    console.log(user.name);
                     user_new = {user: username, socket: socket.id, score: user.score};
                     users.push(user_new);
                 }
                 else {
-                    console.log("could not find user");
                     user_new = {user: username, socket: socket.id, score: 0};
-                    //create new user in db
                     collection.insert({
-                         name: username,
-                         score: 0
+                        name: username,
+                        score: 0
                     });
                     users.push(user_new);
-
                 }
             }
         });
-
-
     });
 
     //similar method for disconnect player
     //socket.leave(socket.room);
 
     socket.on('startGame', function(user) {
-
-
-        console.log("🐵🐵🐵🐵🐵🐵🐵🐵🐵🐵🐵🐵🐵🐵🐵🐵🐵🐵🐵🐵🐵🐵🐵🐵🐵🐵🐵🐵🐵🐵🐵🐵🐵");
-        console.log("NEW GAME");
-        console.log("🦋🦋🦋🦋🦋🦋🦋🦋🦋🦋🦋🦋🦋🦋🦋🦋🦋🦋🦋🦋🦋🦋🦋🦋🦋🦋🦋🦋🦋🦋🦋🦋🦋");
 
         if (rooms.length == 0) {
 
@@ -175,6 +147,34 @@ io.on('connection', function(socket) {
                     }
                 }
             }
+        }
+
+    });
+
+    socket.on('skipmove', function(bool) {
+        if (bool) {
+            let player;
+            let game;
+            for (let i = 0; i < games.length; i++) {
+                for (let x = 0; x < games[i].players.length; x++) {
+                    if (socket.id == games[i].players[x].socket) {
+                        player = games[i].players[x];
+                        games[i].skipTurn(player);
+                        game = games[i];
+                    }
+                }
+            }
+            io.sockets.sockets[game.whoseTurn].emit('skipturn', {
+
+                yourTurn: true,
+                turnCard: game.cardsOrder[game.nextTurn]
+            });
+            io.sockets.sockets[socket.id].emit('skipturn', {
+                yourTurn: false,
+                turnCard: game.cardsOrder[game.nextTurn]
+            });
+
+
         }
 
     });
@@ -319,11 +319,11 @@ io.on('connection', function(socket) {
 
     socket.on('message', function(message) {
 
-        //fixes bug
-        if (message=="bye") {
-            socket.broadcast.emit('message', message);
-        }
-        else {
+        // //fixes bug
+        // if (message=="bye") {
+        //     socket.broadcast.emit('message', message);
+        // }
+        // else {
             if (games !== undefined && games.length > 0) {
                 for (let i = 0; i < games.length; i++) {
                      for (let x = 0; x < games[i].players.length; x++) {
@@ -334,7 +334,7 @@ io.on('connection', function(socket) {
                      }
                 }
             }
-        }
+        //}
 
 
     });
@@ -350,6 +350,43 @@ io.on('connection', function(socket) {
       }
     });
 
+    socket.on('endgame', function(user) {
+        //destroy the game, destroy the players
+        //both players leave the room
+        console.log("😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀");
+        console.log(user + " ended the game");
+        console.log(io.sockets.adapter.sids[socket.id]);
+        console.log("😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀");
+
+
+
+        //find the room the user is in
+        // const room_name = socket.rooms[0];
+        // io.of('/').in(room_name).clients(function(error, clients) {
+        //     if (clients.length > 0) {
+        //         console.log('clients in the room: \n');
+        //         console.log(clients);
+        //         clients.forEach(function (socket_id) {
+        //             io.sockets.sockets[socket_id].leave(room_name);
+        //         });
+        //     }
+        // });
+        //
+        // for (let clientId in clients ) {
+        //     //this is the socket of each client in the room.
+        //     console.log("Socket nickname :" + io.sockets.connected[clientId].nickname);
+        //     if (io.sockets.connected[clientId].nickname != p1) {
+        //         p2 = io.sockets.connected[clientId].nickname;
+        //     }
+        // }
+
+        //send them back a message so they can start a new game
+
+
+
+
+    });
+
 
     function setup(room) {
 
@@ -359,11 +396,11 @@ io.on('connection', function(socket) {
         let sockets = [];
         let gameUsers = [];
 
-        //console.log(room)
 
         let p1 = room.substring(0, room.length - 4);
-        console.log("PLAYER 1 : " + p1);
         let p2;
+
+
 
         for (let clientId in clients ) {
             //this is the socket of each client in the room.
@@ -372,10 +409,6 @@ io.on('connection', function(socket) {
                 p2 = io.sockets.connected[clientId].nickname;
             }
         }
-
-        console.log("PLAYER 2 : " + p2);
-
-        console.log("Socket length" + sockets.length);
 
         let userIDs = [];
 

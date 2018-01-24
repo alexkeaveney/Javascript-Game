@@ -38,11 +38,6 @@ module.exports = class Game {
       //checks if the player called bullshit
       //if the did they take the pile
 
-      console.log("Cheat called in game class");
-
-      console.log(caller);
-      console.log(player);
-
       let caught = false;
       for (let i =0; i < this.turnHand.length; i++) {
 
@@ -81,18 +76,11 @@ module.exports = class Game {
       //remove the cards from this players hand
       let current_player;
 
-      console.log("passed in socket" + socket.nickname);
-
-
-
-
       for (let i =0; i < this.players.length; i++) {
-          console.log("Player" + (i+1) + " socket: " + this.players[i].socket);
           if (this.players[i].socket == socket.id) {
               current_player = this.players[i];
           }
       }
-      console.log("Current player " + current_player.username);
       let cardsSelected = [];
 
       for (let i =0; i < current_player.getHand().length; i++) {
@@ -116,6 +104,26 @@ module.exports = class Game {
       else {
           this.nextTurn = this.nextTurn + 1;
       }
+  }
+
+
+  skipTurn(player) {
+      if (player.socket == this.whoseTurn) {
+          if (this.nextTurn == this.cardsOrder.length) {
+              this.currentTurn = 0;
+              this.nextTurn = 0;
+          }
+          else {
+              this.nextTurn = this.nextTurn + 1;
+              this.currentTurn = this.currentTurn + 1;
+          }
+          for (let i =0; i < this.players.length; i++) {
+              if (this.players[i].socket != player.socket) {
+                  this.whoseTurn = this.players[i].socket;
+              }
+          }
+      }
+
   }
 
 }
