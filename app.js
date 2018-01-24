@@ -185,10 +185,12 @@ io.on('connection', function(socket) {
             //check that its bullshit
             let caller;
             let player;
+            let game;
             for (let i = 0; i < games.length; i++) {
                 for (let x = 0; x < games[i].players.length; x++) {
                     if (socket.id == games[i].players[x].socket) {
                         caller = games[i].players[x];
+                        game = games[i];
                     }
                     else {
                         player = games[i].players[x];
@@ -213,7 +215,8 @@ io.on('connection', function(socket) {
                 if (playerwin != 'none') {
                     try {
                        let collection = db.collection('users');
-                       const new_score = winner.score + 10
+                       const new_score = winner.score + 10;
+                       game.gameOver = true;
                        collection.updateOne(
                           { "name" : playerwin },
                           { $set: { "score" : new_score } }
@@ -293,11 +296,13 @@ io.on('connection', function(socket) {
             if (playerwin != 'none') {
                 try {
                    let collection = db.collection('users');
-                   const new_score = winner.score + 10
+                   const new_score = winner.score + 10;
+                   current_game.gameOver = true;
                    collection.updateOne(
                       { "name" : playerwin },
                       { $set: { "score" : new_score } }
                    );
+
                 } catch (e) {
                    print(e);
                 }
@@ -355,32 +360,55 @@ io.on('connection', function(socket) {
         //both players leave the room
         console.log("😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀");
         console.log(user + " ended the game");
-        console.log(io.sockets.adapter.sids[socket.id]);
+        //console.log(io.sockets.adapter.sids[socket.id]);
+
+        let room_name = Object.keys(io.sockets.adapter.sids[socket.id])[1];
+        Object.keys(io.sockets.adapter.sids[socket.id])[1]
+
+        console.log("🤠🤠🤠🤠🤠🤠🤠🤠🤠🤠🤠🤠🤠🤠🤠🤠🤠🤠🤠🤠");
+
+        console.log(io.sockets.adapter.rooms[room_name].sockets);
+console.log("🤠🤠🤠🤠🤠🤠🤠🤠🤠🤠🤠🤠🤠🤠🤠🤠🤠🤠🤠🤠");
+        //sends game over message to room
+
+        io.to(room_name).emit('gameOver', user);
+
         console.log("😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀");
-
-
-
-        //find the room the user is in
-        // const room_name = socket.rooms[0];
-        // io.of('/').in(room_name).clients(function(error, clients) {
-        //     if (clients.length > 0) {
-        //         console.log('clients in the room: \n');
-        //         console.log(clients);
-        //         clients.forEach(function (socket_id) {
-        //             io.sockets.sockets[socket_id].leave(room_name);
-        //         });
-        //     }
-        // });
-        //
-        // for (let clientId in clients ) {
-        //     //this is the socket of each client in the room.
-        //     console.log("Socket nickname :" + io.sockets.connected[clientId].nickname);
-        //     if (io.sockets.connected[clientId].nickname != p1) {
-        //         p2 = io.sockets.connected[clientId].nickname;
-        //     }
+        // for (let i = 0; i < Object.keys(io.sockets.adapter.rooms[room_name].sockets).length; i++) {
+        //     console.log("in sockets.length");
+        //     let namespace = null;
+        //     let ns = io.of(namespace || "/");
+        //     let sock = ns.connected[Object.keys(io.sockets.adapter.rooms[room_name].sockets)[i]];
+        //     sock.leave(room_name);
         // }
 
-        //send them back a message so they can start a new game
+        // io.sockets.clients(room_name).forEach(function(s){
+        //     s.leave(room_name);
+        // });
+        var clients_in_the_room = io.sockets.adapter.rooms[room_name].sockets;
+        for (var clientId in clients_in_the_room ) {
+            console.log('client: %s', clientId); //Seeing is believing
+            var client_socket = io.sockets.connected[clientId];//Do whatever you want with this
+            client_socket.leave(room_name);
+        }
+        //console.log(sockets);
+        console.log("🤓🤓🤓🤓🤓🤓🤓🤓🤓🤓🤓🤓🤓🤓🤓🤓🤓🤓🤓🤓🤓");
+
+
+        //remove room
+        rooms.splice(room_name, 1);
+
+        //remove game
+        for (let i = 0; i < games.length; i++) {
+            if (games[i].gameOver) {
+                games.splice(games[i], 1);
+            }
+        }
+
+        //checks to see socket has left the room
+        console.log(Object.keys(io.sockets.adapter.sids[socket.id]));
+        console.log(Object.keys(io.sockets.adapter.sids[socket.id])[1]);
+
 
 
 
