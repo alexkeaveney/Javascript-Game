@@ -1,7 +1,7 @@
 # Cheat - Real Time Card Game using Node.js and Web-RTC for live web cam streaming
 This card game known as Cheat, Bullshit or I Doubt It is based on deception. Get rid of your cards as fast as you can but if your opponent catches you cheating you will pick up all the cards put down.
 
-![alt tag](https://github.com/alexkeaveney/boxedin/blob/master/screenshot.jpg)
+![alt tag](https://github.com/alexkeaveney/Javascript-Game/blob/master/screenshot.jpg)
 
 ## Getting Started
 
