@@ -1,0 +1,54 @@
+#startButton, #bullshit, #localVideo, #skip, #claim  {
+    display: none;
+}
+
+#remoteVideo {
+    width: 480px;
+    height: 360px;
+    margin: 0 auto;
+}
+
+#videos, #messages {
+    text-align: center;
+    color: white;
+    font-family: sans-serif;
+}
+
+#cardHolder {
+    margin-top: 20px;
+}
+
+#turnButtons {
+    margin: 0 auto;
+    text-align: center;
+}
+
+#claim {
+    margin-top: 20px;
+    background-color: yellow;
+    font-size: 14pt;
+    border: 2px solid black;
+    margin: 0 auto;
+}
+
+#skip {
+    margin-top: 20px;
+    background-color: blue;
+    font-size: 14pt;
+    border: 2px solid black;
+    color: white;
+    margin: 0 auto;
+}
+
+#bullshit {
+    margin-top: 20px;
+    background-color: red;
+    color: white;
+    font-size: 14pt;
+    border: 2px solid black;
+    margin: 0 auto;
+}
+
+body {
+    background-color: green;
+}

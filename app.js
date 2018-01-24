@@ -1,5 +1,5 @@
-'use strict';
 
+//node modules
 const express = require('express');
 const app = express();
 const server = require('http').createServer(app);
@@ -7,9 +7,8 @@ const io = require('socket.io')(server);
 const parser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
-var path = require('path');
-var os = require('os');
-var nodeStatic = require('node-static');
+const path = require('path');
+const os = require('os');
 
 //classes
 const Card = require('./classes/Card.js');
@@ -27,11 +26,16 @@ app.use(express.static(__dirname + '/node_modules'));
 app.use(express.static(__dirname + '/classes'));
 app.use(express.static(__dirname + '/public/images'));
 app.use(express.static('js/lib'));
+app.use(express.static('js'));
 app.use(express.static('public'));
 
 
 app.get('/', function(req, res) {
     res.sendFile(__dirname + '/public/game.html');
+});
+
+app.get('/howto', function(req, res) {
+    res.sendFile(__dirname + '/public/howto.html');
 });
 
 const MongoClient = require('mongodb').MongoClient
